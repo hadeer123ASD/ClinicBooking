@@ -1,0 +1,16 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="alert alert-danger">
+    <h4 class="alert-heading">Something went wrong</h4>
+    <p class="mb-0">The request could not be completed. Please try again.</p>
+    @if (!string.IsNullOrEmpty(Model.RequestId))
+    {
+        <hr />
+        <p class="small mb-0">Request ID: <code>@Model.RequestId</code></p>
+    }
+</div>
+
+<a class="btn btn-primary" asp-controller="Appointments" asp-action="Index">Back to appointments</a>

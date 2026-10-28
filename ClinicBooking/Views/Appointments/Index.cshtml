@@ -1,0 +1,115 @@
+@model AppointmentPageViewModel
+@{
+    ViewData["Title"] = "Appointments";
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+    var selectedTime = Model.Form.StartTime.HasValue ? Model.Form.StartTime.Value.ToString(@"hh\:mm") : "";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">New appointment</h1>
+    <span class="text-muted small">Default visit length: 30 minutes</span>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<form asp-action="Create" method="post" class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Patient information</h2>
+        <div class="row g-3 mb-4">
+            <div class="col-md-5">
+                <label asp-for="Form.PatientName" class="form-label"></label>
+                <input asp-for="Form.PatientName" class="form-control" maxlength="100" required />
+                <span asp-validation-for="Form.PatientName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Form.BirthDate" class="form-label"></label>
+                <input asp-for="Form.BirthDate" type="date" class="form-control" max="@today" required />
+                <span asp-validation-for="Form.BirthDate" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Form.PhoneNumber" class="form-label"></label>
+                <input asp-for="Form.PhoneNumber" class="form-control" maxlength="30" />
+                <span asp-validation-for="Form.PhoneNumber" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <h2 class="h6 text-uppercase text-muted mb-3">Appointment</h2>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="Form.DoctorId" class="form-label"></label>
+                <select asp-for="Form.DoctorId" asp-items="Model.Doctors" class="form-select" required>
+                    <option value="">Select a doctor</option>
+                </select>
+                <span asp-validation-for="Form.DoctorId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Form.AppointmentDate" class="form-label"></label>
+                <input asp-for="Form.AppointmentDate" type="date" class="form-control" min="@today" required />
+                <span asp-validation-for="Form.AppointmentDate" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <label class="form-label">Available time slots</label>
+        <div id="slots" class="slots-box"
+             data-url="@Url.Action("Slots", "Appointments")"
+             data-selected="@selectedTime">
+            <span class="text-muted small">Select a doctor and a date to see the free times.</span>
+        </div>
+        <div>
+            <span asp-validation-for="Form.StartTime" class="text-danger small"></span>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-end">
+        <button type="submit" class="btn btn-primary px-4">Save appointment</button>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h2 class="h6 mb-0">Saved appointments <span class="badge text-bg-secondary ms-1">@Model.Appointments.Count</span></h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Patient name</th>
+                    <th>Birth date</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Appointments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No appointments yet.</td>
+                    </tr>
+                }
+                @foreach (var item in Model.Appointments)
+                {
+                    <tr>
+                        <td>@item.PatientName</td>
+                        <td>@item.BirthDate.ToString("dd MMM yyyy")</td>
+                        <td>@item.DoctorName</td>
+                        <td>@item.AppointmentDate.ToString("ddd, dd MMM yyyy")</td>
+                        <td>@DateTime.Today.Add(item.StartTime).ToString("h:mm tt")</td>
+                        <td>@item.DurationMinutes min</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/appointments.js" asp-append-version="true"></script>
+}
